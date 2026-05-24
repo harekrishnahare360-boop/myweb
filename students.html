@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Students — Sk Study Way</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar"></aside>
+    <div class="main">
+      <header class="topbar"></header>
+      <div class="content">
+
+        <div class="toolbar">
+          <input id="search" class="input" type="text" placeholder="Search by name, class, or roll..." />
+          <select id="filterClass" class="select"><option value="">All Classes</option></select>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" onclick="openAdd()">+ Add Student</button>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Roll</th>
+                  <th>Name</th>
+                  <th>Class</th>
+                  <th>Parent</th>
+                  <th>Phone</th>
+                  <th>Monthly Fee</th>
+                  <th>Status</th>
+                  <th style="width: 140px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studentList"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Modal -->
+  <div id="studentModal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Student</h3>
+        <button class="modal-close" onclick="UI.closeModal('studentModal')">\u00D7</button>
+      </div>
+      <form id="studentForm">
+        <div class="modal-body">
+          <input type="hidden" id="studentId" />
+          <div class="row row-2">
+            <div class="field">
+              <label>Roll No <span style="color:var(--danger)">*</span></label>
+              <input id="roll" class="input" type="text" required />
+            </div>
+            <div class="field">
+              <label>Full Name <span style="color:var(--danger)">*</span></label>
+              <input id="name" class="input" type="text" required />
+            </div>
+          </div>
+          <div class="row row-2">
+            <div class="field">
+              <label>Class <span style="color:var(--danger)">*</span></label>
+              <input id="class" class="input" type="text" placeholder="e.g. Class 10" required />
+            </div>
+            <div class="field">
+              <label>Section</label>
+              <input id="section" class="input" type="text" placeholder="A / B / ..." />
+            </div>
+          </div>
+          <div class="row row-2">
+            <div class="field">
+              <label>Parent / Guardian</label>
+              <input id="parent" class="input" type="text" />
+            </div>
+            <div class="field">
+              <label>Phone</label>
+              <input id="phone" class="input" type="tel" />
+            </div>
+          </div>
+          <div class="row row-2">
+            <div class="field">
+              <label>Monthly Fee (\u20B9)</label>
+              <input id="monthlyFee" class="input" type="number" min="0" step="50" placeholder="0" />
+            </div>
+            <div class="field">
+              <label>Status</label>
+              <select id="status" class="select">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Address</label>
+            <textarea id="address" class="textarea" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="UI.closeModal('studentModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/students.js"></script>
+</body>
+</html>

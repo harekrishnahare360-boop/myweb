@@ -24,13 +24,13 @@ const AUTH = {
 
   logout() {
     localStorage.removeItem(DB.KEYS.AUTH);
-    location.href = 'index.html';
+    location.href = 'admin.html';
   },
 
   requireAuth() {
     const auth = DB.read(DB.KEYS.AUTH, null);
     if (!auth || !auth.loggedIn) {
-      location.href = 'index.html';
+      location.href = 'admin.html';
       return false;
     }
     return true;

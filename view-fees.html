@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Check Fee Status — Sk Study Way</title>
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/landing.css" />
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav class="landing-nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-brand">
+        <div class="nav-logo">SK</div>
+        <span>Sk Study Way</span>
+      </a>
+      <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="view-attendance.html">Attendance</a></li>
+        <li><a href="view-results.html">Results</a></li>
+        <li><a href="view-fees.html" style="color:var(--primary);font-weight:600;">Fee Status</a></li>
+        <li class="nav-cta"><a href="admin.html" class="btn btn-primary">Admin Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="public-page">
+    <div class="public-container">
+      <div class="public-header">
+        <h1>Check Fee Status</h1>
+        <p>Enter your roll number to view payment history and pending dues</p>
+      </div>
+
+      <div class="search-box">
+        <input id="rollInput" class="input" type="text" placeholder="Enter Roll Number..." autofocus />
+        <button class="btn btn-primary" onclick="searchFees()">Search</button>
+      </div>
+
+      <div id="resultArea"></div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    function searchFees() {
+      const roll = document.getElementById('rollInput').value.trim();
+      const area = document.getElementById('resultArea');
+
+      if (!roll) { area.innerHTML = ''; return; }
+
+      const students = DB.getStudents();
+      const student = students.find(s => s.roll && s.roll.toLowerCase() === roll.toLowerCase());
+
+      if (!student) {
+        area.innerHTML = `
+          <div class="no-result">
+            <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z"/></svg>
+            <h3>Student Not Found</h3>
+            <p>No student found with roll number "<strong>${escHtml(roll)}</strong>". Please check and try again.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const fees = DB.feesByStudent(student.id).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      const initials = (student.name || '?').charAt(0).toUpperCase();
+      const monthlyFee = Number(student.monthlyFee) || 0;
+      const totalPaid = fees.reduce((s, f) => s + Number(f.amount || 0), 0);
+
+      // Calculate months since enrollment (approx)
+      const created = student.createdAt ? new Date(student.createdAt) : new Date();
+      const now = new Date();
+      const monthsDiff = (now.getFullYear() - created.getFullYear()) * 12 + (now.getMonth() - created.getMonth()) + 1;
+      const totalExpected = monthlyFee * Math.max(1, monthsDiff);
+      const pending = Math.max(0, totalExpected - totalPaid);
+
+      let feeTableHtml = '';
+      if (fees.length > 0) {
+        feeTableHtml = `
+          <table class="table" style="margin:0;">
+            <thead><tr><th>Date</th><th>Month</th><th>Amount</th><th>Mode</th><th>Note</th></tr></thead>
+            <tbody>
+              ${fees.map(f => {
+                const dateStr = f.date ? new Date(f.date + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+                const monthStr = f.month ? formatMonth(f.month) : '-';
+                return `<tr>
+                  <td>${dateStr}</td>
+                  <td>${monthStr}</td>
+                  <td><strong style="color:var(--success);">\u20B9${Number(f.amount).toLocaleString('en-IN')}</strong></td>
+                  <td><span class="badge badge-info">${escHtml(f.mode || 'Cash')}</span></td>
+                  <td style="color:var(--text-muted);">${escHtml(f.note || '-')}</td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        `;
+      } else {
+        feeTableHtml = `<div style="padding:30px;text-align:center;color:var(--text-muted);">No fee payments recorded yet.</div>`;
+      }
+
+      area.innerHTML = `
+        <div class="result-panel">
+          <div class="result-panel-header">
+            <div class="result-panel-avatar">${initials}</div>
+            <div class="result-panel-info">
+              <h3>${escHtml(student.name)}</h3>
+              <p>Roll: ${escHtml(student.roll)} | Class: ${escHtml(student.class)}${student.section ? ' - ' + escHtml(student.section) : ''}</p>
+            </div>
+          </div>
+          <div class="result-panel-body">
+            <div class="stats" style="margin-bottom:24px;">
+              <div class="stat">
+                <div class="stat-icon indigo">\u20B9</div>
+                <div class="stat-label">Monthly Fee</div>
+                <div class="stat-value">\u20B9${monthlyFee.toLocaleString('en-IN')}</div>
+              </div>
+              <div class="stat">
+                <div class="stat-icon green">\u2713</div>
+                <div class="stat-label">Total Paid</div>
+                <div class="stat-value" style="color:var(--success);">\u20B9${totalPaid.toLocaleString('en-IN')}</div>
+                <div class="stat-foot">${fees.length} payments</div>
+              </div>
+              <div class="stat">
+                <div class="stat-icon red">\u26A0</div>
+                <div class="stat-label">Pending Dues</div>
+                <div class="stat-value" style="color:${pending > 0 ? 'var(--danger)' : 'var(--success)'};">\u20B9${pending.toLocaleString('en-IN')}</div>
+                <div class="stat-foot">${pending > 0 ? 'Please clear dues' : 'All clear!'}</div>
+              </div>
+            </div>
+
+            <h4 style="margin-bottom:12px; font-size:15px;">Payment History</h4>
+            <div class="table-wrap">${feeTableHtml}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function formatMonth(m) {
+      if (!m) return '-';
+      const [y, mo] = m.split('-');
+      const d = new Date(Number(y), Number(mo) - 1, 1);
+      return d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+    }
+
+    function escHtml(str) {
+      return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    document.getElementById('rollInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') searchFees();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Login — Sk Study Way</title>
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/landing.css" />
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav class="landing-nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-brand">
+        <div class="nav-logo">SK</div>
+        <span>Sk Study Way</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="view-attendance.html">Attendance</a></li>
+        <li><a href="view-results.html">Results</a></li>
+        <li><a href="view-fees.html">Fee Status</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="login-wrap" style="padding-top: 68px;">
+    <div class="login-card">
+      <div class="brand">
+        <div class="brand-logo">SK</div>
+        <h1>Admin Login</h1>
+        <p>Sk Study Way — Management Portal</p>
+      </div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" class="input" type="text" placeholder="admin" required autocomplete="username" />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" class="input" type="password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" required autocomplete="current-password" />
+        </div>
+        <div id="err" style="color: var(--danger); font-size: 13px; margin-bottom: 12px; display:none;"></div>
+        <button type="submit" class="btn btn-primary btn-block">Sign in to Admin Panel</button>
+      </form>
+
+      <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted); text-align: center;">
+        <a href="index.html">&larr; Back to Home</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    AUTH.init();
+    // If already logged in, jump to dashboard
+    const auth = DB.read(DB.KEYS.AUTH, null);
+    if (auth && auth.loggedIn) location.href = 'dashboard.html';
+
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value;
+      const errEl = document.getElementById('err');
+      if (AUTH.login(u, p)) {
+        location.href = 'dashboard.html';
+      } else {
+        errEl.textContent = 'Invalid username or password.';
+        errEl.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

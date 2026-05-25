@@ -1,5 +1,5 @@
 /* ============================================
-   students.js — CRUD for students
+   students.js — CRUD for students (uses Batch)
    ============================================ */
 (function () {
   if (!AUTH.requireAuth()) return;
@@ -9,27 +9,27 @@
 
   function getFiltered() {
     const q = $('search').value.trim().toLowerCase();
-    const cls = $('filterClass').value;
+    const batch = $('filterBatch').value;
     return DB.getStudents().filter(s => {
-      if (cls && s.class !== cls) return false;
+      if (batch && s.batch !== batch) return false;
       if (!q) return true;
-      return [s.name, s.roll, s.class, s.parent, s.phone].some(v =>
+      return [s.name, s.roll, s.batch, s.parent, s.phone, s.subject].some(v =>
         String(v || '').toLowerCase().includes(q)
       );
     });
   }
 
-  function refreshClassFilter() {
-    const classes = [...new Set(DB.getStudents().map(s => s.class).filter(Boolean))].sort();
-    const sel = $('filterClass');
+  function refreshBatchFilter() {
+    const batches = [...new Set(DB.getStudents().map(s => s.batch).filter(Boolean))].sort();
+    const sel = $('filterBatch');
     const cur = sel.value;
-    sel.innerHTML = '<option value="">All Classes</option>' +
-      classes.map(c => `<option value="${UI.esc(c)}">${UI.esc(c)}</option>`).join('');
+    sel.innerHTML = '<option value="">All Batches</option>' +
+      batches.map(b => `<option value="${UI.esc(b)}">${UI.esc(b)}</option>`).join('');
     sel.value = cur;
   }
 
   function render() {
-    refreshClassFilter();
+    refreshBatchFilter();
     const list = getFiltered();
     const tbody = $('studentList');
     if (list.length === 0) {
@@ -39,8 +39,8 @@
     tbody.innerHTML = list.map(s => `
       <tr>
         <td><strong>${UI.esc(s.roll)}</strong></td>
-        <td>${UI.esc(s.name)}</td>
-        <td>${UI.esc(s.class)}${s.section ? ' - ' + UI.esc(s.section) : ''}</td>
+        <td>${UI.esc(s.name)}${s.subject ? `<div style="font-size:11px;color:var(--text-muted);">${UI.esc(s.subject)}</div>` : ''}</td>
+        <td>${UI.esc(s.batch)}</td>
         <td>${UI.esc(s.parent || '-')}</td>
         <td>${UI.esc(s.phone || '-')}</td>
         <td>${UI.money(s.monthlyFee)}</td>
@@ -69,8 +69,8 @@
     $('studentId').value = s.id;
     $('roll').value = s.roll || '';
     $('name').value = s.name || '';
-    $('class').value = s.class || '';
-    $('section').value = s.section || '';
+    $('batch').value = s.batch || '';
+    $('subject').value = s.subject || '';
     $('parent').value = s.parent || '';
     $('phone').value = s.phone || '';
     $('monthlyFee').value = s.monthlyFee || '';
@@ -93,8 +93,8 @@
     const data = {
       roll: $('roll').value.trim(),
       name: $('name').value.trim(),
-      class: $('class').value.trim(),
-      section: $('section').value.trim(),
+      batch: $('batch').value.trim(),
+      subject: $('subject').value.trim(),
       parent: $('parent').value.trim(),
       phone: $('phone').value.trim(),
       monthlyFee: Number($('monthlyFee').value) || 0,
@@ -114,7 +114,7 @@
   });
 
   $('search').addEventListener('input', render);
-  $('filterClass').addEventListener('change', render);
+  $('filterBatch').addEventListener('change', render);
 
   render();
 })();

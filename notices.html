@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Notices — Sk Study Way</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar"></aside>
+    <div class="main">
+      <header class="topbar"></header>
+      <div class="content">
+
+        <div class="toolbar">
+          <input id="search" class="input" type="text" placeholder="Search notices..." />
+          <div class="spacer"></div>
+          <button class="btn btn-primary" onclick="openAdd()">+ Post Notice</button>
+        </div>
+
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">
+          Notices posted here are visible on the public landing page so students &amp; parents can see them.
+        </p>
+
+        <div id="noticeList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Modal -->
+  <div id="noticeModal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Post Notice</h3>
+        <button class="modal-close" onclick="UI.closeModal('noticeModal')">&times;</button>
+      </div>
+      <form id="noticeForm">
+        <div class="modal-body">
+          <input type="hidden" id="noticeId" />
+          <div class="field">
+            <label>Title <span style="color:var(--danger)">*</span></label>
+            <input id="title" class="input" type="text" maxlength="100" required placeholder="e.g. Holiday on Diwali" />
+          </div>
+          <div class="field">
+            <label>Message <span style="color:var(--danger)">*</span></label>
+            <textarea id="body" class="textarea" rows="6" required placeholder="Write the notice details here..."></textarea>
+          </div>
+          <div class="field">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+              <input id="pinned" type="checkbox" />
+              <span>&#128204; Pin this notice (shows at top)</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="UI.closeModal('noticeModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Notice</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/notices.js"></script>
+</body>
+</html>

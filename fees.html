@@ -13,7 +13,7 @@
       <header class="topbar"></header>
       <div class="content">
 
-        <div class="stats" id="feeStats"></div>
+        <div class="stats stagger" id="feeStats"></div>
 
         <div class="toolbar">
           <select id="filterStudent" class="select"><option value="">All Students</option></select>
@@ -32,7 +32,7 @@
                   <th>Receipt</th>
                   <th>Date</th>
                   <th>Student</th>
-                  <th>Class</th>
+                  <th>Batch</th>
                   <th>Month</th>
                   <th>Amount</th>
                   <th>Mode</th>
@@ -53,7 +53,7 @@
     <div class="modal">
       <div class="modal-header">
         <h3>Record Fee Payment</h3>
-        <button class="modal-close" onclick="UI.closeModal('feeModal')">\u00D7</button>
+        <button class="modal-close" onclick="UI.closeModal('feeModal')">&times;</button>
       </div>
       <form id="feeForm">
         <div class="modal-body">
@@ -63,7 +63,7 @@
           </div>
           <div class="row row-2">
             <div class="field">
-              <label>Amount (\u20B9) <span style="color:var(--danger)">*</span></label>
+              <label>Amount (&#8377;) <span style="color:var(--danger)">*</span></label>
               <input id="amount" class="input" type="number" min="1" step="1" required />
             </div>
             <div class="field">
@@ -105,14 +105,15 @@
     <div class="modal">
       <div class="modal-header">
         <h3>Payment Receipt</h3>
-        <button class="modal-close" onclick="UI.closeModal('receiptModal')">\u00D7</button>
+        <button class="modal-close" onclick="UI.closeModal('receiptModal')">&times;</button>
       </div>
       <div class="modal-body">
         <div class="receipt" id="receiptBody"></div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="UI.closeModal('receiptModal')">Close</button>
-        <button class="btn btn-primary" onclick="window.print()">\u{1F5A8} Print</button>
+        <button id="receiptShareBtn" class="btn btn-success">&#128241; Share on WhatsApp</button>
+        <button class="btn btn-primary" onclick="window.print()">&#128424; Print</button>
       </div>
     </div>
   </div>

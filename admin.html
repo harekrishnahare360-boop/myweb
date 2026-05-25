@@ -9,13 +9,15 @@
 </head>
 <body>
 
-  <!-- NAVIGATION -->
   <nav class="landing-nav">
     <div class="nav-container">
       <a href="index.html" class="nav-brand">
         <div class="nav-logo">SK</div>
         <span>Sk Study Way</span>
       </a>
+      <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="view-attendance.html">Attendance</a></li>
@@ -25,12 +27,12 @@
     </div>
   </nav>
 
-  <div class="login-wrap" style="padding-top: 68px;">
+  <div class="login-wrap" style="padding-top: 90px; padding-bottom: 40px;">
     <div class="login-card">
       <div class="brand">
         <div class="brand-logo">SK</div>
         <h1>Admin Login</h1>
-        <p>Sk Study Way — Management Portal</p>
+        <p>Sk Study Way &mdash; Management Portal</p>
       </div>
 
       <form id="loginForm">
@@ -55,8 +57,10 @@
   <script src="js/storage.js"></script>
   <script src="js/auth.js"></script>
   <script>
+    // Apply theme
+    document.documentElement.setAttribute('data-theme', localStorage.getItem(DB.KEYS.THEME) || 'light');
+
     AUTH.init();
-    // If already logged in, jump to dashboard
     const auth = DB.read(DB.KEYS.AUTH, null);
     if (auth && auth.loggedIn) location.href = 'dashboard.html';
 

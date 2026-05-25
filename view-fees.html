@@ -9,7 +9,6 @@
 </head>
 <body>
 
-  <!-- NAVIGATION -->
   <nav class="landing-nav">
     <div class="nav-container">
       <a href="index.html" class="nav-brand">
@@ -23,7 +22,7 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="view-attendance.html">Attendance</a></li>
         <li><a href="view-results.html">Results</a></li>
-        <li><a href="view-fees.html" style="color:var(--primary);font-weight:600;">Fee Status</a></li>
+        <li><a href="view-fees.html" class="active-link">Fee Status</a></li>
         <li class="nav-cta"><a href="admin.html" class="btn btn-primary">Admin Login</a></li>
       </ul>
     </div>
@@ -31,12 +30,12 @@
 
   <div class="public-page">
     <div class="public-container">
-      <div class="public-header">
+      <div class="public-header fade-in">
         <h1>Check Fee Status</h1>
         <p>Enter your roll number to view payment history and pending dues</p>
       </div>
 
-      <div class="search-box">
+      <div class="search-box slide-up">
         <input id="rollInput" class="input" type="text" placeholder="Enter Roll Number..." autofocus />
         <button class="btn btn-primary" onclick="searchFees()">Search</button>
       </div>
@@ -58,7 +57,7 @@
 
       if (!student) {
         area.innerHTML = `
-          <div class="no-result">
+          <div class="no-result fade-in">
             <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z"/></svg>
             <h3>Student Not Found</h3>
             <p>No student found with roll number "<strong>${escHtml(roll)}</strong>". Please check and try again.</p>
@@ -72,14 +71,13 @@
       const monthlyFee = Number(student.monthlyFee) || 0;
       const totalPaid = fees.reduce((s, f) => s + Number(f.amount || 0), 0);
 
-      // Calculate months since enrollment (approx)
       const created = student.createdAt ? new Date(student.createdAt) : new Date();
       const now = new Date();
       const monthsDiff = (now.getFullYear() - created.getFullYear()) * 12 + (now.getMonth() - created.getMonth()) + 1;
       const totalExpected = monthlyFee * Math.max(1, monthsDiff);
       const pending = Math.max(0, totalExpected - totalPaid);
 
-      let feeTableHtml = '';
+      let feeTableHtml;
       if (fees.length > 0) {
         feeTableHtml = `
           <table class="table" style="margin:0;">
@@ -104,16 +102,16 @@
       }
 
       area.innerHTML = `
-        <div class="result-panel">
+        <div class="result-panel slide-up">
           <div class="result-panel-header">
             <div class="result-panel-avatar">${initials}</div>
             <div class="result-panel-info">
               <h3>${escHtml(student.name)}</h3>
-              <p>Roll: ${escHtml(student.roll)} | Class: ${escHtml(student.class)}${student.section ? ' - ' + escHtml(student.section) : ''}</p>
+              <p>Roll: ${escHtml(student.roll)} | Batch: ${escHtml(student.batch || '-')}</p>
             </div>
           </div>
           <div class="result-panel-body">
-            <div class="stats" style="margin-bottom:24px;">
+            <div class="stats stagger" style="margin-bottom:24px;">
               <div class="stat">
                 <div class="stat-icon indigo">\u20B9</div>
                 <div class="stat-label">Monthly Fee</div>

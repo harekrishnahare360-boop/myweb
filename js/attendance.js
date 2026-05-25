@@ -1,5 +1,5 @@
 /* ============================================
-   attendance.js — Daily attendance marking
+   attendance.js — Daily attendance marking (Batch)
    ============================================ */
 (function () {
   if (!AUTH.requireAuth()) return;
@@ -7,12 +7,12 @@
 
   const $ = (id) => document.getElementById(id);
 
-  function refreshClassFilter() {
-    const classes = [...new Set(DB.getStudents().map(s => s.class).filter(Boolean))].sort();
-    const sel = $('filterClass');
+  function refreshBatchFilter() {
+    const batches = [...new Set(DB.getStudents().map(s => s.batch).filter(Boolean))].sort();
+    const sel = $('filterBatch');
     const cur = sel.value;
-    sel.innerHTML = '<option value="">All Classes</option>' +
-      classes.map(c => `<option value="${UI.esc(c)}">${UI.esc(c)}</option>`).join('');
+    sel.innerHTML = '<option value="">All Batches</option>' +
+      batches.map(b => `<option value="${UI.esc(b)}">${UI.esc(b)}</option>`).join('');
     sel.value = cur;
   }
 
@@ -23,22 +23,23 @@
 
   function render() {
     const date = $('date').value;
-    const cls = $('filterClass').value;
+    const batch = $('filterBatch').value;
     $('dateLabel').textContent = UI.fmtDate(date);
 
-    refreshClassFilter();
+    refreshBatchFilter();
 
     const students = DB.getStudents()
       .filter(s => s.status !== 'inactive')
-      .filter(s => !cls || s.class === cls)
-      .sort((a, b) => (a.class || '').localeCompare(b.class || '') || (a.roll || '').localeCompare(b.roll || ''));
+      .filter(s => !batch || s.batch === batch)
+      .sort((a, b) => (a.batch || '').localeCompare(b.batch || '') || (a.roll || '').localeCompare(b.roll || ''));
 
-    // Stats for selected date
     const dayRecords = DB.attendanceByDate(date);
     const present = dayRecords.filter(a => a.status === 'present').length;
     const absent  = dayRecords.filter(a => a.status === 'absent').length;
     const late    = dayRecords.filter(a => a.status === 'late').length;
-    const unmarked = students.length - dayRecords.filter(r => students.some(s => s.id === r.studentId)).length;
+    const studentSet = new Set(students.map(s => s.id));
+    const marked = dayRecords.filter(r => studentSet.has(r.studentId)).length;
+    const unmarked = students.length - marked;
 
     $('attStats').innerHTML = `
       <div class="stat"><div class="stat-icon green">\u2713</div><div class="stat-label">Present</div><div class="stat-value">${present}</div></div>
@@ -62,7 +63,7 @@
       return `<tr class="attendance-row">
         <td><strong>${UI.esc(s.roll)}</strong></td>
         <td>${UI.esc(s.name)}</td>
-        <td>${UI.esc(s.class)}${s.section ? ' - ' + UI.esc(s.section) : ''}</td>
+        <td>${UI.esc(s.batch)}</td>
         <td>${badge}</td>
         <td>
           <div class="att-buttons">
@@ -83,10 +84,10 @@
 
   window.markAll = function (status) {
     const date = $('date').value;
-    const cls = $('filterClass').value;
+    const batch = $('filterBatch').value;
     const students = DB.getStudents()
       .filter(s => s.status !== 'inactive')
-      .filter(s => !cls || s.class === cls);
+      .filter(s => !batch || s.batch === batch);
     if (students.length === 0) return;
     if (!confirm(`Mark all ${students.length} students as ${status} for ${UI.fmtDate(date)}?`)) return;
     students.forEach(s => DB.setAttendance(date, s.id, status));
@@ -129,13 +130,13 @@
       </div>
       <div class="table-wrap">
         <table class="table">
-          <thead><tr><th>Roll</th><th>Name</th><th>Class</th><th>Present</th><th>Absent</th><th>Late</th><th>Total</th><th>%</th></tr></thead>
+          <thead><tr><th>Roll</th><th>Name</th><th>Batch</th><th>Present</th><th>Absent</th><th>Late</th><th>Total</th><th>%</th></tr></thead>
           <tbody>
             ${rows.length === 0 ? '<tr><td colspan="8" class="empty">No students.</td></tr>' :
               rows.map(r => `<tr>
                 <td>${UI.esc(r.s.roll)}</td>
                 <td>${UI.esc(r.s.name)}</td>
-                <td>${UI.esc(r.s.class)}</td>
+                <td>${UI.esc(r.s.batch)}</td>
                 <td style="color:var(--success);font-weight:600;">${r.p}</td>
                 <td style="color:var(--danger);font-weight:600;">${r.ab}</td>
                 <td style="color:var(--warning);font-weight:600;">${r.l}</td>
@@ -150,7 +151,7 @@
   };
 
   $('date').addEventListener('change', render);
-  $('filterClass').addEventListener('change', render);
+  $('filterBatch').addEventListener('change', render);
 
   $('date').value = UI.todayISO();
   render();

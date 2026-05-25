@@ -1,5 +1,5 @@
 /* ============================================
-   results.js — Marks entry & report cards
+   results.js — Marks entry & report cards (Batch + WhatsApp share)
    ============================================ */
 (function () {
   if (!AUTH.requireAuth()) return;
@@ -27,7 +27,7 @@
   function populateStudentSelects() {
     const students = DB.getStudents();
     const opts = students
-      .map(s => `<option value="${s.id}">${UI.esc(s.name)} (${UI.esc(s.roll)} - ${UI.esc(s.class)})</option>`)
+      .map(s => `<option value="${s.id}">${UI.esc(s.name)} (${UI.esc(s.roll)} - ${UI.esc(s.batch)})</option>`)
       .join('');
     $('studentId').innerHTML = '<option value="">-- Select student --</option>' + opts;
 
@@ -70,7 +70,7 @@
       const g = gradeFor(t.pct);
       return `<tr>
         <td><strong>${UI.esc(s ? s.name : 'Unknown')}</strong> <span style="color:var(--text-muted);font-size:12px;">(${UI.esc(s?.roll || '-')})</span></td>
-        <td>${UI.esc(s?.class || '-')}</td>
+        <td>${UI.esc(s?.batch || '-')}</td>
         <td>${UI.esc(r.examName)}</td>
         <td>${UI.fmtDate(r.examDate)}</td>
         <td>${(r.subjects || []).length} subjects</td>
@@ -85,13 +85,12 @@
     }).join('');
   }
 
-  // ----- Modal: subject row management -----
   function subjectRowHtml(name = '', marks = '', outOf = 100) {
     return `<tr>
       <td><input class="input subj-name" type="text" placeholder="e.g. Mathematics" value="${UI.esc(name)}" /></td>
       <td><input class="input subj-marks" type="number" min="0" step="0.5" value="${marks}" /></td>
       <td><input class="input subj-outOf" type="number" min="1" step="1" value="${outOf}" /></td>
-      <td><button type="button" class="btn btn-ghost btn-sm" onclick="this.closest('tr').remove()">\u00D7</button></td>
+      <td><button type="button" class="btn btn-ghost btn-sm" onclick="this.closest('tr').remove()">&times;</button></td>
     </tr>`;
   }
 
@@ -111,7 +110,6 @@
     return subs;
   }
 
-  // ----- Window-exposed actions -----
   window.openAdd = function () {
     if (DB.getStudents().length === 0) {
       UI.toast('Please add students first', 'error');
@@ -131,6 +129,37 @@
     DB.deleteResult(id);
     UI.toast('Result deleted', 'success');
     render();
+  };
+
+  window.shareCardOnWA = function (id) {
+    const r = DB.getResults().find(x => x.id === id);
+    if (!r) return;
+    const s = DB.getStudent(r.studentId);
+    const t = totals(r.subjects || []);
+    const g = gradeFor(t.pct);
+    const lines = [
+      '*SK STUDY WAY - Report Card*',
+      '------------------------------',
+      `Student: ${s?.name || '-'} (${s?.roll || '-'})`,
+      `Batch: ${s?.batch || '-'}`,
+      `Exam: ${r.examName}`,
+      `Date: ${UI.fmtDate(r.examDate)}`,
+      '',
+      '*Subjects:*',
+      ...(r.subjects || []).map(sub => `- ${sub.name}: ${sub.marks}/${sub.outOf}`),
+      '',
+      `*Total: ${t.obtained} / ${t.max}*`,
+      `*Percentage: ${t.pct}%*`,
+      `*Grade: ${g.g}*`,
+      r.remarks ? `\nRemarks: ${r.remarks}` : '',
+      '------------------------------',
+      '- Sk Study Way',
+    ].filter(Boolean).join('\n');
+    const phone = (s?.phone || '').replace(/\D/g, '');
+    const url = phone
+      ? `https://wa.me/${phone.length === 10 ? '91' + phone : phone}?text=${encodeURIComponent(lines)}`
+      : `https://wa.me/?text=${encodeURIComponent(lines)}`;
+    window.open(url, '_blank');
   };
 
   window.viewCard = function (id) {
@@ -170,8 +199,8 @@
           <div style="font-size:16px;font-weight:600;">${UI.esc(s?.roll || '-')}</div>
         </div>
         <div>
-          <div style="font-size:12px;color:var(--text-muted);">Class</div>
-          <div style="font-size:16px;font-weight:600;">${UI.esc(s?.class || '-')}${s?.section ? ' - ' + UI.esc(s.section) : ''}</div>
+          <div style="font-size:12px;color:var(--text-muted);">Batch</div>
+          <div style="font-size:16px;font-weight:600;">${UI.esc(s?.batch || '-')}</div>
         </div>
         <div>
           <div style="font-size:12px;color:var(--text-muted);">Exam</div>
@@ -193,25 +222,26 @@
       <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; padding: 18px; background: var(--primary-light); border-radius: 10px; text-align: center;">
         <div>
           <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Total</div>
-          <div style="font-size:22px;font-weight:700;color:var(--primary-dark);">${t.obtained} / ${t.max}</div>
+          <div style="font-size:22px;font-weight:700;color:var(--primary);">${t.obtained} / ${t.max}</div>
         </div>
         <div>
           <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Percentage</div>
-          <div style="font-size:22px;font-weight:700;color:var(--primary-dark);">${t.pct}%</div>
+          <div style="font-size:22px;font-weight:700;color:var(--primary);">${t.pct}%</div>
         </div>
         <div>
           <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Grade</div>
-          <div style="font-size:22px;font-weight:700;color:var(--primary-dark);">${g.g}</div>
+          <div style="font-size:22px;font-weight:700;color:var(--primary);">${g.g}</div>
         </div>
       </div>
 
-      ${r.remarks ? `<div style="margin-top:18px;padding:14px;background:#f9fafb;border-radius:8px;"><strong>Remarks:</strong> ${UI.esc(r.remarks)}</div>` : ''}
+      ${r.remarks ? `<div style="margin-top:18px;padding:14px;background:var(--surface-hover);border-radius:8px;"><strong>Remarks:</strong> ${UI.esc(r.remarks)}</div>` : ''}
 
       <div style="margin-top:30px; display:grid; grid-template-columns: 1fr 1fr; gap: 40px;">
         <div style="text-align:center;border-top:1px solid var(--border);padding-top:8px;font-size:12px;color:var(--text-muted);">Teacher's Signature</div>
         <div style="text-align:center;border-top:1px solid var(--border);padding-top:8px;font-size:12px;color:var(--text-muted);">Principal's Signature</div>
       </div>
     `;
+    $('cardShareBtn').onclick = () => shareCardOnWA(r.id);
     UI.openModal('cardModal');
   };
 

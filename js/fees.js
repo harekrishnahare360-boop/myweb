@@ -1,5 +1,5 @@
 /* ============================================
-   fees.js — Payment tracking + receipts
+   fees.js — Payment tracking + receipts (with WhatsApp share)
    ============================================ */
 (function () {
   if (!AUTH.requireAuth()) return;
@@ -10,7 +10,7 @@
   function populateStudentSelects() {
     const students = DB.getStudents();
     const opts = students
-      .map(s => `<option value="${s.id}">${UI.esc(s.name)} (${UI.esc(s.roll)} - ${UI.esc(s.class)})</option>`)
+      .map(s => `<option value="${s.id}">${UI.esc(s.name)} (${UI.esc(s.roll)} - ${UI.esc(s.batch)})</option>`)
       .join('');
 
     $('studentId').innerHTML = '<option value="">-- Select student --</option>' + opts;
@@ -57,11 +57,9 @@
     const fees = DB.getFees();
     const total = fees.reduce((s, f) => s + Number(f.amount || 0), 0);
 
-    // This month
     const ym = UI.todayISO().slice(0, 7);
     const thisMonth = fees.filter(f => f.month === ym).reduce((s, f) => s + Number(f.amount || 0), 0);
 
-    // Pending estimate: for each active student, expected = monthlyFee for current month - paid for this month
     const students = DB.getStudents().filter(s => s.status !== 'inactive');
     let pending = 0;
     students.forEach(s => {
@@ -107,7 +105,7 @@
         <td><code style="font-size:11px;color:var(--text-muted);">${f.id}</code></td>
         <td>${UI.fmtDate(f.date)}</td>
         <td>${UI.esc(s ? s.name : 'Unknown')} <span style="color:var(--text-muted);font-size:12px;">(${UI.esc(s?.roll || '-')})</span></td>
-        <td>${UI.esc(s?.class || '-')}</td>
+        <td>${UI.esc(s?.batch || '-')}</td>
         <td>${formatMonth(f.month)}</td>
         <td><strong>${UI.money(f.amount)}</strong></td>
         <td><span class="badge badge-info">${UI.esc(f.mode || 'Cash')}</span></td>
@@ -138,6 +136,31 @@
     render();
   };
 
+  window.shareReceiptOnWA = function (id) {
+    const f = DB.getFees().find(x => x.id === id);
+    if (!f) return;
+    const s = DB.getStudent(f.studentId);
+    const lines = [
+      '*SK STUDY WAY - Fee Receipt*',
+      '------------------------------',
+      `Receipt: ${f.id}`,
+      `Student: ${s?.name || '-'} (${s?.roll || '-'})`,
+      `Batch: ${s?.batch || '-'}`,
+      `Date: ${UI.fmtDate(f.date)}`,
+      `For Month: ${formatMonth(f.month)}`,
+      `Amount Paid: ${UI.money(f.amount)}`,
+      `Mode: ${f.mode || 'Cash'}`,
+      f.note ? `Note: ${f.note}` : '',
+      '------------------------------',
+      'Thank you! - Sk Study Way',
+    ].filter(Boolean).join('\n');
+    const phone = (s?.phone || '').replace(/\D/g, '');
+    const url = phone
+      ? `https://wa.me/${phone.length === 10 ? '91' + phone : phone}?text=${encodeURIComponent(lines)}`
+      : `https://wa.me/?text=${encodeURIComponent(lines)}`;
+    window.open(url, '_blank');
+  };
+
   window.showReceipt = function (id) {
     const f = DB.getFees().find(x => x.id === id);
     if (!f) return;
@@ -149,15 +172,16 @@
       <div class="receipt-row"><span>Date:</span><strong>${UI.fmtDate(f.date)}</strong></div>
       <div class="receipt-row"><span>Student:</span><strong>${UI.esc(s?.name || '-')}</strong></div>
       <div class="receipt-row"><span>Roll No:</span><strong>${UI.esc(s?.roll || '-')}</strong></div>
-      <div class="receipt-row"><span>Class:</span><strong>${UI.esc(s?.class || '-')}${s?.section ? ' - ' + UI.esc(s.section) : ''}</strong></div>
+      <div class="receipt-row"><span>Batch:</span><strong>${UI.esc(s?.batch || '-')}</strong></div>
       <div class="receipt-row"><span>For Month:</span><strong>${formatMonth(f.month)}</strong></div>
       <div class="receipt-row"><span>Payment Mode:</span><strong>${UI.esc(f.mode || 'Cash')}</strong></div>
       ${f.note ? `<div class="receipt-row"><span>Note:</span><strong>${UI.esc(f.note)}</strong></div>` : ''}
       <div class="receipt-row receipt-total"><span>TOTAL PAID:</span><strong>${UI.money(f.amount)}</strong></div>
-      <div style="text-align:center;margin-top:24px;font-size:12px;color:var(--text-muted);">
+      <div style="text-align:center;margin-top:24px;font-size:12px;color:#6b7280;">
         Thank you! \u2014 Sk Study Way
       </div>
     `;
+    $('receiptShareBtn').onclick = () => shareReceiptOnWA(f.id);
     UI.openModal('receiptModal');
   };
 
@@ -176,7 +200,6 @@
     UI.toast('Payment recorded', 'success');
     UI.closeModal('feeModal');
     render();
-    // Auto-show receipt
     setTimeout(() => showReceipt(fee.id), 200);
   });
 

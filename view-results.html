@@ -9,7 +9,6 @@
 </head>
 <body>
 
-  <!-- NAVIGATION -->
   <nav class="landing-nav">
     <div class="nav-container">
       <a href="index.html" class="nav-brand">
@@ -22,7 +21,7 @@
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="view-attendance.html">Attendance</a></li>
-        <li><a href="view-results.html" style="color:var(--primary);font-weight:600;">Results</a></li>
+        <li><a href="view-results.html" class="active-link">Results</a></li>
         <li><a href="view-fees.html">Fee Status</a></li>
         <li class="nav-cta"><a href="admin.html" class="btn btn-primary">Admin Login</a></li>
       </ul>
@@ -31,12 +30,12 @@
 
   <div class="public-page">
     <div class="public-container">
-      <div class="public-header">
+      <div class="public-header fade-in">
         <h1>Check Your Results</h1>
         <p>Enter your roll number to view your exam results and report cards</p>
       </div>
 
-      <div class="search-box">
+      <div class="search-box slide-up">
         <input id="rollInput" class="input" type="text" placeholder="Enter Roll Number..." autofocus />
         <button class="btn btn-primary" onclick="searchResults()">Search</button>
       </div>
@@ -68,7 +67,7 @@
 
       if (!student) {
         area.innerHTML = `
-          <div class="no-result">
+          <div class="no-result fade-in">
             <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z"/></svg>
             <h3>Student Not Found</h3>
             <p>No student found with roll number "<strong>${escHtml(roll)}</strong>". Please check and try again.</p>
@@ -82,12 +81,12 @@
 
       if (results.length === 0) {
         area.innerHTML = `
-          <div class="result-panel">
+          <div class="result-panel slide-up">
             <div class="result-panel-header">
               <div class="result-panel-avatar">${initials}</div>
               <div class="result-panel-info">
                 <h3>${escHtml(student.name)}</h3>
-                <p>Roll: ${escHtml(student.roll)} | Class: ${escHtml(student.class)}${student.section ? ' - ' + escHtml(student.section) : ''}</p>
+                <p>Roll: ${escHtml(student.roll)} | Batch: ${escHtml(student.batch || '-')}</p>
               </div>
             </div>
             <div class="result-panel-body">
@@ -100,7 +99,7 @@
         return;
       }
 
-      let cardsHtml = results.map(r => {
+      const cardsHtml = results.map((r, idx) => {
         const obtained = r.subjects.reduce((s, x) => s + Number(x.marks || 0), 0);
         const max = r.subjects.reduce((s, x) => s + Number(x.outOf || 0), 0);
         const pct = max ? Math.round((obtained / max) * 100) : 0;
@@ -122,7 +121,7 @@
         const dateStr = r.examDate ? new Date(r.examDate + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
 
         return `
-          <div class="card" style="margin-bottom:20px;">
+          <div class="card slide-up" style="margin-bottom:20px;animation-delay:${idx * 0.1}s;">
             <div class="card-header">
               <h3>${escHtml(r.examName)}</h3>
               <span style="font-size:13px;color:var(--text-muted);">${dateStr}</span>
@@ -134,14 +133,14 @@
                   <tbody>${subjectRows}</tbody>
                 </table>
               </div>
-              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; padding:20px; background:var(--primary-light); text-align:center;">
+              <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:12px; padding:20px; background:var(--primary-light); text-align:center;">
                 <div>
                   <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Total</div>
-                  <div style="font-size:20px;font-weight:700;color:var(--primary-dark);">${obtained} / ${max}</div>
+                  <div style="font-size:20px;font-weight:700;color:var(--primary);">${obtained} / ${max}</div>
                 </div>
                 <div>
                   <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Percentage</div>
-                  <div style="font-size:20px;font-weight:700;color:var(--primary-dark);">${pct}%</div>
+                  <div style="font-size:20px;font-weight:700;color:var(--primary);">${pct}%</div>
                 </div>
                 <div>
                   <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Grade</div>
@@ -155,16 +154,14 @@
       }).join('');
 
       area.innerHTML = `
-        <div class="result-panel" style="border:none;background:transparent;overflow:visible;">
-          <div class="result-panel-header" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:20px;">
-            <div class="result-panel-avatar">${initials}</div>
-            <div class="result-panel-info">
-              <h3>${escHtml(student.name)}</h3>
-              <p>Roll: ${escHtml(student.roll)} | Class: ${escHtml(student.class)}${student.section ? ' - ' + escHtml(student.section) : ''}</p>
-            </div>
+        <div class="result-panel-header slide-up" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:20px;">
+          <div class="result-panel-avatar">${initials}</div>
+          <div class="result-panel-info">
+            <h3>${escHtml(student.name)}</h3>
+            <p>Roll: ${escHtml(student.roll)} | Batch: ${escHtml(student.batch || '-')}</p>
           </div>
-          ${cardsHtml}
         </div>
+        ${cardsHtml}
       `;
     }
 

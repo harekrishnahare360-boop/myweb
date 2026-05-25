@@ -14,8 +14,8 @@
       <div class="content">
 
         <div class="toolbar">
-          <input id="search" class="input" type="text" placeholder="Search by name, class, or roll..." />
-          <select id="filterClass" class="select"><option value="">All Classes</option></select>
+          <input id="search" class="input" type="text" placeholder="Search by name, batch, or roll..." />
+          <select id="filterBatch" class="select"><option value="">All Batches</option></select>
           <div class="spacer"></div>
           <button class="btn btn-primary" onclick="openAdd()">+ Add Student</button>
         </div>
@@ -27,7 +27,7 @@
                 <tr>
                   <th>Roll</th>
                   <th>Name</th>
-                  <th>Class</th>
+                  <th>Batch</th>
                   <th>Parent</th>
                   <th>Phone</th>
                   <th>Monthly Fee</th>
@@ -48,7 +48,7 @@
     <div class="modal">
       <div class="modal-header">
         <h3 id="modalTitle">Add Student</h3>
-        <button class="modal-close" onclick="UI.closeModal('studentModal')">\u00D7</button>
+        <button class="modal-close" onclick="UI.closeModal('studentModal')">&times;</button>
       </div>
       <form id="studentForm">
         <div class="modal-body">
@@ -65,12 +65,12 @@
           </div>
           <div class="row row-2">
             <div class="field">
-              <label>Class <span style="color:var(--danger)">*</span></label>
-              <input id="class" class="input" type="text" placeholder="e.g. Class 10" required />
+              <label>Batch <span style="color:var(--danger)">*</span></label>
+              <input id="batch" class="input" type="text" placeholder="e.g. Morning 10th, Evening Physics" required />
             </div>
             <div class="field">
-              <label>Section</label>
-              <input id="section" class="input" type="text" placeholder="A / B / ..." />
+              <label>Subject (optional)</label>
+              <input id="subject" class="input" type="text" placeholder="e.g. Maths, Science" />
             </div>
           </div>
           <div class="row row-2">
@@ -80,12 +80,12 @@
             </div>
             <div class="field">
               <label>Phone</label>
-              <input id="phone" class="input" type="tel" />
+              <input id="phone" class="input" type="tel" placeholder="e.g. 9876543210" />
             </div>
           </div>
           <div class="row row-2">
             <div class="field">
-              <label>Monthly Fee (\u20B9)</label>
+              <label>Monthly Fee (&#8377;)</label>
               <input id="monthlyFee" class="input" type="number" min="0" step="50" placeholder="0" />
             </div>
             <div class="field">

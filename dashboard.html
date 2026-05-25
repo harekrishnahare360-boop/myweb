@@ -12,11 +12,28 @@
     <div class="main">
       <header class="topbar"></header>
       <div class="content">
-        <div class="stats" id="stats"></div>
+        <div class="stats stagger" id="stats"></div>
+
+        <div class="row row-2" style="grid-template-columns: 2fr 1fr; margin-bottom: 18px;">
+          <div class="card">
+            <div class="card-header">
+              <h3>Fees Collected (Last 6 Months)</h3>
+              <span style="font-size:12px;color:var(--text-muted);" id="chartTotal"></span>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrap" id="feeChart"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Today's Attendance</h3><a href="attendance.html">Mark &rarr;</a></div>
+            <div class="card-body" id="todayAtt"></div>
+          </div>
+        </div>
 
         <div class="row row-2" style="grid-template-columns: 2fr 1fr;">
           <div class="card">
-            <div class="card-header"><h3>Recent Fee Payments</h3><a href="fees.html">View all \u2192</a></div>
+            <div class="card-header"><h3>Recent Fee Payments</h3><a href="fees.html">View all &rarr;</a></div>
             <div class="table-wrap">
               <table class="table">
                 <thead><tr><th>Date</th><th>Student</th><th>Amount</th><th>Mode</th></tr></thead>
@@ -26,22 +43,23 @@
           </div>
 
           <div class="card">
-            <div class="card-header"><h3>Today's Attendance</h3><a href="attendance.html">Mark \u2192</a></div>
-            <div class="card-body" id="todayAtt"></div>
+            <div class="card-header"><h3>Latest Notices</h3><a href="notices.html">Manage &rarr;</a></div>
+            <div class="card-body" id="latestNotices"></div>
           </div>
         </div>
 
         <div class="card" style="margin-top: 18px;">
-          <div class="card-header"><h3>Welcome to Sk Study Way</h3></div>
+          <div class="card-header"><h3>Quick Actions</h3></div>
           <div class="card-body">
             <p style="color: var(--text-muted); margin-bottom: 14px;">
-              A complete tuition management system. Manage students, track fees, mark attendance, and record results — all in one place.
+              Manage students, track fees, mark attendance, record results &mdash; all in one place.
             </p>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
               <a href="students.html" class="btn btn-primary">+ Add Student</a>
               <a href="fees.html" class="btn btn-ghost">Record Fee</a>
               <a href="attendance.html" class="btn btn-ghost">Mark Attendance</a>
               <a href="results.html" class="btn btn-ghost">Enter Results</a>
+              <a href="notices.html" class="btn btn-ghost">Post Notice</a>
             </div>
           </div>
         </div>
